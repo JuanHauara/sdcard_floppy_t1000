@@ -113,14 +113,14 @@
 /*-- Board internal pins                                      -- */
 /*---------------------------------------------------------------*/
 #define BOARD_GPIO_PORT_DO_STATUS_LED			GPIOA
-#define BOARD_GPIO_PIN_DO_STATUS_LED			GPIO_PIN_6
+#define BOARD_GPIO_PIN_DO_STATUS_LED			GPIO_PIN_3
 
 // SD card
-#define BOARD_GPIO_PORT_DO_SDCARD_SPI_CS		GPIOE
-#define BOARD_GPIO_PIN_DO_SDCARD_SPI_CS			GPIO_PIN_11
+#define BOARD_GPIO_PORT_DO_SDCARD_SPI_CS		GPIOA
+#define BOARD_GPIO_PIN_DO_SDCARD_SPI_CS			GPIO_PIN_4
 
-#define BOARD_GPIO_PORT_DO_SDCARD_ON			GPIOE
-#define BOARD_GPIO_PIN_DO_SDCARD_ON			    GPIO_PIN_15
+#define BOARD_GPIO_PORT_DO_SDCARD_ON			GPIOC
+#define BOARD_GPIO_PIN_DO_SDCARD_ON			    GPIO_PIN_4
 
 
 #endif  // BOARD_PINOUT_H
