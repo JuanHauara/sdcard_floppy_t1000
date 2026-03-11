@@ -1,0 +1,4 @@
+../libraries/board_gpio/board_gpio.c:8:6:board_gpio_read_di	17
+../libraries/board_gpio/board_gpio.c:34:6:board_gpio_read_do	17
+../libraries/board_gpio/board_gpio.c:60:6:board_gpio_write_do	20
+../libraries/board_gpio/board_gpio.c:90:6:board_gpio_toggle_do	20

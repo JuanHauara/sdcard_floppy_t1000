@@ -1,0 +1,12 @@
+../libraries/sd_card/sd_card.c:8:25:sd_card_map_fresult	2
+../libraries/sd_card/sd_card.c:46:18:sd_card_init	2
+../libraries/sd_card/sd_card.c:58:18:sd_card_deinit	1
+../libraries/sd_card/sd_card.c:66:6:sd_card_is_ready	1
+../libraries/sd_card/sd_card.c:71:18:sd_card_file_open	10
+../libraries/sd_card/sd_card.c:132:18:sd_card_file_close	2
+../libraries/sd_card/sd_card.c:142:18:sd_card_file_read	4
+../libraries/sd_card/sd_card.c:158:18:sd_card_file_write	4
+../libraries/sd_card/sd_card.c:177:18:sd_card_file_seek	2
+../libraries/sd_card/sd_card.c:187:18:sd_card_file_tell	3
+../libraries/sd_card/sd_card.c:207:18:sd_card_file_size	3
+../libraries/sd_card/sd_card.c:227:18:sd_card_file_sync	2

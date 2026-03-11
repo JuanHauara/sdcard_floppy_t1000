@@ -1,0 +1,12 @@
+../libraries/sd_card/sd_spi.c:71:16:spi_xfer	32	static
+../libraries/sd_card/sd_spi.c:107:13:wait_ready	16	static
+../libraries/sd_card/sd_spi.c:359:13:lba_range_is_valid	0	static
+../libraries/sd_card/sd_spi.c:197:13:rcvr_datablock.constprop	32	static
+../libraries/sd_card/sd_spi.c:96:13:deselect_card	8	static
+../libraries/sd_card/sd_spi.c:127:16:send_cmd	24	static
+../libraries/sd_card/sd_spi.c:316:24:compute_sector_count.constprop	24	static
+../libraries/sd_card/sd_spi.c:383:17:sd_spi_init	24	static
+../libraries/sd_card/sd_spi.c:537:6:sd_spi_is_ready	0	static
+../libraries/sd_card/sd_spi.c:542:17:sd_spi_read_blocks	32	static
+../libraries/sd_card/sd_spi.c:595:17:sd_spi_write_blocks	32	static
+../libraries/sd_card/sd_spi.c:660:17:sd_spi_get_sector_count	16	static
