@@ -10,43 +10,26 @@
 
 typedef enum 
 {
-	DI0 = 0,
-	DI1, 
-	DI2, 
-	DI3, 
-	DI4, 
-	DI5, 
-	DI6, 
-	DI7, 
-	DI8, 
-	DI9, 
-	DI10, 
-	DI11, 
-	DI12, 
-	DI13, 
-	DI14, 
-	DI15, 
+	FDD_FDSELA = 0,
+	FDD_MONA,
+	FDD_LOWDNS,
+	FDD_FDCDRC,
+	FDD_STEP,
+	FDD_WDATA,
+	FDD_WGATE,
+	FDD_SIDE,
 } board_gpio_di_pin_t;
 
 typedef enum 
 {
-	/* Board GP output pins */
-	DO0 = 0,
-	DO1, 
-	DO2, 
-	DO3, 
-	DO4, 
-	DO5, 
-	DO6, 
-	DO7, 
-	DO8, 
-	DO9, 
-	DO10, 
-	DO11, 
-	DO12, 
-	DO13, 
-	DO14, 
-	DO15, 
+	/* FDD interface output pins */
+	FDD_INDEX = 0,
+	FDD_DSKCHG,
+	FDD_READY,
+	FDD_MEDIA,
+	FDD_TRACK0,
+	FDD_WPROTC,
+	FDD_RDDA,
 
 	/* Board internal pins */
 	STATUS_LED, 

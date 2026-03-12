@@ -1,8 +1,7 @@
 /*
 	SPI SD-card interface used to initialize the card and perform block-level
 	read/write operations. It is intended to implement the STM32CubeIDE-generated
-	FATFS "User-defined" disk I/O layer (typically user_diskio.c), replacing the
-	function bodies while keeping Cube-generated function signatures.
+	FATFS "User-defined" disk I/O layer (typically user_diskio.c).
 */
 
 #ifndef SD_SPI_H
