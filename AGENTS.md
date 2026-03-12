@@ -1,46 +1,141 @@
 # Project: Toshiba T1000LE floppy emulator on STM32F411
 
 ## Mission
-Build a minimal floppy emulator firmware for a Toshiba T1000LE using STM32F411 + microSD, taking only the useful parts from FlashFloppy and discarding the rest.
+Build a minimal floppy emulator firmware for a Toshiba T1000LE using STM32F411 + microSD, starting from a clean STM32CubeIDE project and selectively copying only the useful pieces from the original FlashFloppy source tree into `libraries/floppy_emu/`.
 
 This is not a generic Gotek-compatible product.
 This is not a broad-compatibility floppy emulator.
 This is a focused embedded firmware project for one machine only.
 
+## Current project status
+The active STM32CubeIDE project already exists and is compiling correctly.
+
+The following libraries are already integrated and working:
+- `libraries/board_gpio`
+- `libraries/debug_log`
+- `libraries/sd_card`
+- `libraries/utils`
+- `FATFS`
+
+These libraries are already proven in another project and should be reused as-is unless there is a strong technical reason not to.
+
+The following peripherals are already configured and working in STM32CubeIDE:
+- `SPI1`
+  - Configured for microSD
+  - Current baudrate: 328.125 Kbit/s
+- `TIM2`
+  - Configured to run at 1 MHz
+  - Used by `libraries/utils` for `delay_us()` and `get_us()`
+- `USB_OTG_FS`
+  - Configured in device-only mode
+  - Used for debug messages through virtual COM port via `libraries/debug_log`
+
+Do not redesign or replace these already working foundations unless strictly necessary.
+
+## Workspace layout
+The workspace contains two code trees:
+
+### 1. Active project tree
+This is the real firmware project.
+All final firmware code must live here.
+
+### 2. `original_flashfloppy/`
+This folder contains the original FlashFloppy source tree.
+It exists only as a reference source.
+It must be treated as read-only.
+Do not modify it.
+Do not move files out of it.
+Only inspect files there and copy selected files into `libraries/floppy_emu/` inside the active project.
+
+## Very important workflow rule
+When reusing FlashFloppy code:
+- never move files from `original_flashfloppy/`
+- always copy them
+- destination must be inside `libraries/floppy_emu/` unless there is a very strong reason otherwise
+- preserve `original_flashfloppy/` as an untouched baseline
+- prefer copying the minimum required files only
+- do not import the full FlashFloppy project into the active build
+
 ## Development workflow
-- Create a new empty STM32CubeIDE project for STM32F411.
-- Configure and enable required peripherals using STM32CubeIDE UI.
-- Use STM32CubeIDE only for:
+- STM32CubeIDE is used for:
   - project generation
   - peripheral configuration
   - build
   - debug
-- Use VSCode with ChatGPT GPT-5.4 for implementation work.
-- Do not preserve the original FlashFloppy project structure unless it is useful.
-- The new project is the main codebase.
-- Only copy selected files from FlashFloppy into the new project.
-- Prefer copying only the minimum required source files rather than importing the whole original repository.
+- VSCode with ChatGPT GPT-5.4 is used for:
+  - code inspection
+  - architecture decisions
+  - selecting useful FlashFloppy files
+  - implementing firmware
+  - adapting imported code
+- The assistant must reason across both trees:
+  - active project tree
+  - `original_flashfloppy/`
+- The assistant must explicitly state source and destination paths when recommending copied files.
 
 ## Target hardware
 - MCU: STM32F411
+- Prototype board: Blackpill STM32F411
 - Storage: microSD
 - Host: Toshiba T1000LE floppy interface
-- Prototype board: Blackpill STM32F411 + external microSD board
 - Initial firmware target: one fixed floppy image on microSD
 
 ## Existing local libraries to reuse
-The project must reuse these existing libraries from another STM32F411 project:
+Reuse these existing local libraries in the active project:
 
-- `libraries/board_gpio`
-  - Used to manage MCU pins.
-- `libraries/debug_log`
-  - Used to print debug messages through a virtual COM port over MCU USB.
-- `libraries/sd_card`
-  - FatFs wrapper plus SPI SD-card low-level interface.
-  - Used to initialize the SD card and perform block-level read/write operations.
-  - Intended to implement the STM32CubeIDE-generated FATFS "User-defined" disk I/O layer, typically `user_diskio.c`, by replacing function bodies while keeping Cube-generated function signatures.
+### `libraries/board_gpio`
+MCU GPIO/pin handling library.
 
-Assume these libraries already exist and should be integrated into the new project instead of reinventing equivalent code.
+### `libraries/debug_log`
+Debug output over virtual COM port via MCU USB.
+
+### `libraries/sd_card`
+FatFs wrapper plus SPI SD-card low-level interface.
+Initializes the SD card and performs block-level read/write.
+Intended to implement STM32CubeIDE-generated FATFS "User-defined" disk I/O layer, typically `user_diskio.c`, by replacing function bodies while preserving Cube-generated signatures.
+
+When handling microSD and files, prefer using these existing APIs:
+- `sd_card_status_t sd_card_init(void);`
+- `sd_card_status_t sd_card_deinit(void);`
+- `bool sd_card_is_ready(void);`
+
+- `sd_card_status_t sd_card_file_open(sd_card_file_t *file, const char *path, uint32_t flags);`
+- `sd_card_status_t sd_card_file_close(sd_card_file_t *file);`
+- `sd_card_status_t sd_card_file_read(sd_card_file_t *file, void *buf, uint32_t len, uint32_t *out_read);`
+- `sd_card_status_t sd_card_file_write(sd_card_file_t *file, const void *buf, uint32_t len, uint32_t *out_written);`
+- `sd_card_status_t sd_card_file_seek(sd_card_file_t *file, uint32_t offset);`
+- `sd_card_status_t sd_card_file_tell(sd_card_file_t *file, uint32_t *out_pos);`
+- `sd_card_status_t sd_card_file_size(sd_card_file_t *file, uint32_t *out_size);`
+- `sd_card_status_t sd_card_file_sync(sd_card_file_t *file);`
+
+These APIs may be modified if strictly necessary, but always prefer keeping the storage layer simple and easy to maintain.
+
+### `libraries/utils`
+Provides utility functions for delays and timebase access.
+
+When timing is needed, prefer using these existing APIs:
+- `void delay_ms(uint32_t ms);`
+- `void delay_us(uint32_t us);`
+- `uint32_t get_ms(void);`
+- `uint32_t get_us(void);`
+
+Do not reinvent equivalent delay/time helpers if these functions already solve the problem.
+
+## Integration policy for FlashFloppy
+The imported FlashFloppy code should become a controlled local library:
+
+- destination folder: `libraries/floppy_emu/`
+- only copy the minimum useful files
+- imported files may then be adapted for this project
+- prefer a small and understandable `floppy_emu` library over preserving original project structure
+
+When reviewing files inside `original_flashfloppy/`, always classify them into one of these categories:
+- copy as-is into `libraries/floppy_emu/`
+- copy then adapt into `libraries/floppy_emu/`
+- use only as reference
+- do not copy
+
+Do not leave this implicit.
 
 ## Non-goals
 Do not optimize for:
@@ -53,20 +148,17 @@ Do not optimize for:
 - generic configuration UI
 - broad machine compatibility
 - preserving the full original FlashFloppy feature set
-- carrying legacy code that is not needed
+- carrying unused legacy code into the active project
 
 If a subsystem only exists to support those features, prefer not copying it at all.
 
 ## Primary goals, in order
-1. Create a clean STM32CubeIDE-based project for STM32F411.
-2. Integrate existing local libraries:
-   - `board_gpio`
-   - `debug_log`
-   - `sd_card`
-3. Bring up clocks, GPIO, timers, SPI, debug and microSD.
-4. Mount FAT filesystem using STM32CubeIDE-generated FATFS integration plus local `sd_card` library.
+1. Preserve the clean STM32CubeIDE project.
+2. Keep `original_flashfloppy/` untouched as reference.
+3. Reuse existing working libraries and peripheral configuration.
+4. Mount FAT filesystem through the existing storage stack.
 5. Open one fixed floppy image from microSD.
-6. Reuse only the minimum useful FlashFloppy source files.
+6. Copy only the minimum useful FlashFloppy files into `libraries/floppy_emu/`.
 7. Implement enough floppy emulation for Toshiba T1000LE bring-up.
 8. Achieve stable read-only operation first.
 9. Add write support only after read path is stable.
@@ -75,19 +167,20 @@ If a subsystem only exists to support those features, prefer not copying it at a
 - Deterministic behavior over feature richness.
 - Small, understandable code over clever code.
 - Minimal imported code from FlashFloppy.
-- No unnecessary legacy code.
+- No unnecessary legacy code in the active project.
 - Prefer explicit state machines.
 - Prefer simple interfaces between layers.
 - Avoid premature abstraction.
 - Preserve observability and debugability.
 - Keep timing-critical paths obvious.
+- Prefer reusing existing `utils` and `sd_card` APIs instead of introducing new timing or storage abstractions.
 
 ## Scope assumptions
 Assume:
 - The Toshiba pinout will be provided or already exists in project docs.
 - The floppy image is a standard DOS-compatible 720KB or 1.44MB image.
 - The first milestone only needs one static mounted image.
-- The project may reuse parts of FlashFloppy, but only by selectively copying useful files into the new project.
+- The assistant may inspect `original_flashfloppy/` and selectively reuse code from it.
 
 Do not assume:
 - standard Gotek pin mapping
@@ -95,11 +188,12 @@ Do not assume:
 - stock FlashFloppy storage backend wiring
 - display/buttons/UI are needed
 - this project must remain upstream-compatible
-- the whole FlashFloppy repository should be imported
+- the whole FlashFloppy tree should be copied
 
 ## Coding style
 - Language: C
 - File names: snake_case, lowercase only
+- Folder names: snake_case, lowercase only
 - Functions: snake_case
 - Macros/constants: upper snake case
 - Prefer short, explicit modules with clear ownership
@@ -108,25 +202,27 @@ Do not assume:
 - Keep comments technical and concise
 
 ## Change policy
-Before proposing code changes:
-1. Inspect the current new STM32CubeIDE project structure.
-2. Identify which existing local libraries are already present.
-3. Inspect FlashFloppy only to locate the minimum useful source files.
-4. Recommend exactly which files should be copied from FlashFloppy into the new project.
+Before proposing changes:
+1. Inspect the active project tree first.
+2. Inspect `original_flashfloppy/` only to locate potentially useful source files.
+3. Respect the existing working libraries and already configured peripherals.
+4. Recommend exactly which files should be copied from `original_flashfloppy/` into `libraries/floppy_emu/`.
 5. Do not suggest copying unused or speculative files.
+6. When timing is needed, prefer the existing `utils` functions.
+7. When file or storage access is needed, prefer the existing `sd_card` APIs.
 
-For every meaningful change, state:
-- files to modify/create/copy
-- purpose of each file
+For every meaningful recommendation, state:
+- source file path
+- destination file path
+- whether to:
+  - copy as-is
+  - copy and adapt
+  - use only as reference
+  - ignore
+- purpose of the file
 - dependencies
 - impact/risk
 - whether the change is required now or can be deferred
-
-When reviewing FlashFloppy, classify files into:
-- copy as-is
-- copy then adapt
-- use only as reference
-- do not copy
 
 ## Unknowns and uncertainty
 Always separate conclusions into:
@@ -141,50 +237,52 @@ Never invent:
 - FlashFloppy internal behavior
 - Toshiba-specific electrical assumptions
 
-If something is uncertain, say so clearly and ask to inspect the relevant file or documentation.
+If something is uncertain, say so clearly and request the exact file, schematic, or relevant source snippet.
 
-## Preferred architecture
-Keep the new project split into these conceptual layers:
+## Preferred architecture in the active project
+The active project should be organized conceptually into:
 
-1. `platform`
-   - STM32CubeIDE-generated startup and peripheral init
-   - clocks
-   - GPIO
-   - timers
-   - SPI
-   - interrupt plumbing
+### `platform`
+- STM32CubeIDE-generated startup and peripheral init
+- clocks
+- GPIO
+- timers
+- SPI
+- interrupt plumbing
 
-2. `libraries`
-   - `board_gpio`
-   - `debug_log`
-   - `sd_card`
+### `libraries`
+- `board_gpio`
+- `debug_log`
+- `sd_card`
+- `utils`
+- `floppy_emu`
 
-3. `storage`
-   - FatFs integration
-   - fixed image mount/open
-   - image read/write backend
+### `storage`
+- fixed image mount/open
+- image read/write backend
+- thin integration over `sd_card`
 
-4. `floppy_core`
-   - track/side state
-   - sector/image interpretation
-   - ready/index/track0/write-protect/disk-change behavior
-   - host-visible logical behavior
+### `floppy_core`
+- track/side state
+- sector/image interpretation
+- ready/index/track0/write-protect/disk-change behavior
+- host-visible logical behavior
 
-5. `host_if`
-   - Toshiba-side signal adaptation
-   - step handling
-   - side select
-   - motor/select/write gate/write data/read data lines
-   - timing-critical signal I/O
+### `host_if`
+- Toshiba-side signal adaptation
+- step handling
+- side select
+- motor/select/write gate/write data/read data lines
+- timing-critical signal I/O
 
-6. `app`
-   - startup sequence
-   - init order
-   - mount fixed image
-   - run loop / service loop
-   - debug status
+### `app`
+- startup sequence
+- init order
+- mount fixed image
+- run loop / service loop
+- debug status
 
-This layering does not need to match stock FlashFloppy.
+This structure does not need to match stock FlashFloppy.
 
 ## FlashFloppy reuse policy
 Use FlashFloppy only where it saves real engineering time, especially for:
@@ -202,26 +300,23 @@ Do not carry over FlashFloppy subsystems that are unnecessary, especially:
 - configuration systems not needed for one fixed image
 - code included only for broad compatibility
 
-Prefer a clean new codebase plus selected imported files over a large inherited codebase.
+Prefer a clean active codebase plus selected imported files over a large inherited codebase.
 
 ## Bring-up strategy
 Work in short, verifiable phases.
 Each phase must end in a concrete, testable result.
 
 Recommended phase order:
-1. Create clean STM32CubeIDE project.
-2. Integrate `board_gpio`, `debug_log`, `sd_card`.
-3. Bring up basic platform init.
-4. Bring up debug output.
-5. Bring up microSD low-level access.
-6. Mount FAT.
-7. Open one fixed image.
-8. Copy the minimum useful FlashFloppy files.
-9. Integrate floppy emulation core gradually.
-10. Implement minimal host-visible floppy readiness behavior.
-11. Implement read path.
-12. Validate on Toshiba.
-13. Only then implement write path.
+1. Inspect active project tree and `original_flashfloppy/`.
+2. Identify the minimum useful FlashFloppy files.
+3. Copy the first minimal subset into `libraries/floppy_emu/`.
+4. Integrate the copied code into the active build.
+5. Use the existing `sd_card` layer to mount/open one fixed image.
+6. Integrate floppy emulation core gradually.
+7. Implement minimal host-visible floppy readiness behavior.
+8. Implement read path.
+9. Validate on Toshiba.
+10. Only then implement write path.
 
 ## Debug strategy
 Prefer adding lightweight instrumentation for:
@@ -233,6 +328,7 @@ Prefer adding lightweight instrumentation for:
 - index generation
 - ready/track0 transitions
 
+Use `debug_log` for observability.
 If timing is sensitive, use compile-time debug guards.
 
 ## Patch strategy
@@ -248,20 +344,28 @@ If a larger rewrite is justified, explain why simpler options are worse.
 - mixing storage logic with host signal handling
 - hidden side effects across modules
 - hardcoding assumptions without labeling them
-- importing the full original FlashFloppy tree without clear need
+- importing the full original FlashFloppy tree into the active project
 - keeping legacy code "just in case"
+- modifying `original_flashfloppy/`
+- replacing already working local libraries without clear reason
+- adding new timing helpers if `utils` already covers the need
+- adding new storage/file wrappers if `sd_card` already covers the need
 
 ## Expected assistant behavior
-When helping in this repo:
+When helping in this workspace:
 - first inspect, then propose
+- reason across both trees
 - be implementation-oriented
 - produce concrete code, not only theory
 - keep patches minimal
 - call out risks early
 - prefer decisions over vague option dumps
-- if multiple options exist, recommend one
-- explicitly tell which original files to copy into the new project
-- explicitly tell which original files not to copy
+- explicitly tell which files in `original_flashfloppy/` to copy
+- explicitly tell where they should go in `libraries/floppy_emu/`
+- explicitly tell which files must not be copied
+- treat `original_flashfloppy/` as read-only
+- respect the existing working project base
+- prefer using the existing `utils` and `sd_card` APIs
 
 ## First milestone definition
 The first real success condition is:

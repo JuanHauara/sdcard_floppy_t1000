@@ -1,0 +1,145 @@
+Lee primero AGENTS.md y síguelo estrictamente.
+
+Estado actual del workspace:
+
+Hay dos árboles de código:
+
+1. Proyecto activo
+- Es mi proyecto real en STM32CubeIDE para STM32F411.
+- Ya compila correctamente.
+- Aquí debe quedar el firmware final.
+- Todo el hardware se configura desde la UI de STM32CubeIDE.
+
+2. `original_flashfloppy/`
+- Es una copia del proyecto original FlashFloppy.
+- Está dentro del workspace solo como referencia.
+- Debe tratarse como read-only.
+- No debe modificarse.
+- No quiero mover archivos desde ahí.
+- Solo quiero copiar al proyecto activo los archivos realmente necesarios.
+
+La idea es ir tomando solo los archivos necesarios de `original_flashfloppy/` e irlos colocando en:
+- `libraries/floppy_emu/`
+
+No quiero importar todo FlashFloppy.
+No quiero dejar código legacy innecesario.
+Quiero una base limpia.
+
+Estado actual del proyecto activo:
+- Ya compila.
+- Ya tengo funcionando estas librerías:
+  - `libraries/board_gpio`
+  - `libraries/debug_log`
+  - `libraries/sd_card`
+  - `libraries/utils`
+  - `FATFS`
+- Estas librerías ya fueron muy probadas en otro proyecto y deben reutilizarse.
+
+Periféricos ya configurados y funcionando:
+- `SPI1`
+  - Baudrate actual: 328.125 Kbit/s
+  - Usado para la microSD
+- `TIM2`
+  - Configurado a 1 MHz
+  - Usado por `libraries/utils` para `delay_us()` y `get_us()`
+- `USB_OTG_FS`
+  - Configurado en device-only mode
+  - Usado para logs por puerto COM virtual mediante `libraries/debug_log`
+
+Funciones existentes de tiempo que debes usar cuando necesites delays o timestamps:
+- `void delay_ms(uint32_t ms);`
+- `void delay_us(uint32_t us);`
+- `uint32_t get_ms(void);`
+- `uint32_t get_us(void);`
+
+Cuando necesites manejar tiempos, usa estas funciones de `libraries/utils` en lugar de inventar nuevas abstracciones, salvo justificación muy fuerte.
+
+Funciones existentes de microSD/archivos que debes usar preferentemente:
+- `sd_card_status_t sd_card_init(void);`
+- `sd_card_status_t sd_card_deinit(void);`
+- `bool sd_card_is_ready(void);`
+
+- `sd_card_status_t sd_card_file_open(sd_card_file_t *file, const char *path, uint32_t flags);`
+- `sd_card_status_t sd_card_file_close(sd_card_file_t *file);`
+- `sd_card_status_t sd_card_file_read(sd_card_file_t *file, void *buf, uint32_t len, uint32_t *out_read);`
+- `sd_card_status_t sd_card_file_write(sd_card_file_t *file, const void *buf, uint32_t len, uint32_t *out_written);`
+- `sd_card_status_t sd_card_file_seek(sd_card_file_t *file, uint32_t offset);`
+- `sd_card_status_t sd_card_file_tell(sd_card_file_t *file, uint32_t *out_pos);`
+- `sd_card_status_t sd_card_file_size(sd_card_file_t *file, uint32_t *out_size);`
+- `sd_card_status_t sd_card_file_sync(sd_card_file_t *file);`
+
+Puedes proponer modificaciones sobre `libraries/sd_card` si fueran estrictamente necesarias, pero siempre prioriza mantener la solución simple y fácil de mantener.
+
+Objetivo del proyecto:
+Desarrollar un emulador de disquetera para una Toshiba T1000LE usando:
+- STM32F411
+- Blackpill para prototipo
+- microSD
+- una sola imagen fija de disquete
+
+Restricciones importantes:
+- Sin USB host
+- Sin pantalla
+- Sin botones
+- Sin selección de múltiples imágenes
+- Solo una imagen fija
+- Primer hito: emulación estable en solo lectura
+- Hito posterior: soporte de escritura
+- Esto no es un producto genérico tipo Gotek
+- Es un emulador específico para una sola máquina
+
+Cómo quiero que trabajes:
+1. Inspecciona primero ambos árboles:
+   - el proyecto activo
+   - `original_flashfloppy/`
+2. Considera `original_flashfloppy/` como fuente de referencia read-only.
+3. No propongas mover archivos desde `original_flashfloppy/`.
+4. Solo propón copiar al proyecto activo los archivos estrictamente necesarios.
+5. Todo archivo reutilizado desde FlashFloppy debe ir, salvo justificación fuerte, a:
+   - `libraries/floppy_emu/`
+6. Para cada archivo relevante de `original_flashfloppy/`, clasifícalo como:
+   - copiar tal cual
+   - copiar y adaptar
+   - usar solo como referencia
+   - no copiar
+7. Mantén los cambios mínimos y orientados a implementación real.
+8. No propongas grandes refactors salvo que estén claramente justificados.
+9. No quiero arrastrar código legacy innecesario.
+10. Respeta la base ya funcional del proyecto activo.
+11. Cuando algo sea incierto, etiquétalo explícitamente como:
+   - confirmado
+   - probable
+   - desconocido / pendiente de verificar
+
+En tu primera respuesta, no escribas código todavía salvo que sea necesario.
+En su lugar, dame estas 8 cosas:
+
+1. Un mapa conciso del proyecto activo desde la perspectiva de este port.
+2. Un mapa conciso de `original_flashfloppy/` desde la perspectiva de qué podría reutilizarse.
+3. Qué rol deberían tener dentro del proyecto activo estas áreas:
+   - `libraries/floppy_emu`
+   - `storage`
+   - `host_if`
+   - `app`
+4. Qué partes de `original_flashfloppy/` debo inspeccionar primero.
+5. Una primera lista de archivos de `original_flashfloppy/` clasificados como:
+   - copiar tal cual
+   - copiar y adaptar
+   - usar solo como referencia
+   - no copiar
+6. Qué subsistemas deben quedar fuera desde la fase 1.
+7. Un plan corto por fases donde cada fase termine en algo verificable.
+8. Qué información adicional necesitas de mi proyecto activo o del pinout Toshiba para seguir con seguridad.
+
+Requisitos adicionales:
+- Los nombres de archivos y carpetas deben mantenerse en snake_case y en minúsculas.
+- Prioriza solo C.
+- Prefiere máquinas de estado explícitas y comportamiento determinista.
+- Prioriza observabilidad y facilidad de depuración.
+- No inventes supuestos de hardware.
+- Si necesitas el árbol del proyecto activo, el pinout de la Toshiba, o el cableado actual, pide el archivo exacto o dime qué información falta.
+
+Después de ese primer análisis, trabajaremos de forma incremental y aplicaremos cambios al código paso a paso, siempre manteniendo:
+- el proyecto activo como firmware final
+- `original_flashfloppy/` como referencia read-only
+- y copiando solo los archivos realmente necesarios a `libraries/floppy_emu/`
