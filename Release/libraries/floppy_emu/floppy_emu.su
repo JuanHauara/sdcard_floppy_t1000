@@ -1,0 +1,13 @@
+../libraries/floppy_emu/floppy_emu.c:148:28:floppy_emu_track_emit_byte	8	static
+../libraries/floppy_emu/floppy_emu.c:154:28:floppy_emu_track_emit_fill	24	static
+../libraries/floppy_emu/floppy_emu.c:170:28:floppy_emu_track_emit_sync.constprop	12	static
+../libraries/floppy_emu/floppy_emu.c:337:21:floppy_emu_mount_fixed_image	16	static
+../libraries/floppy_emu/floppy_emu.c:375:6:floppy_emu_unmount	8	static
+../libraries/floppy_emu/floppy_emu.c:390:6:floppy_emu_is_ready	0	static
+../libraries/floppy_emu/floppy_emu.c:395:13:floppy_emu_get_path	0	static
+../libraries/floppy_emu/floppy_emu.c:405:30:floppy_emu_get_geometry	0	static
+../libraries/floppy_emu/floppy_emu.c:415:10:floppy_emu_get_sector_count	0	static
+../libraries/floppy_emu/floppy_emu.c:425:21:floppy_emu_read_lba_sector	32	static
+../libraries/floppy_emu/floppy_emu.c:475:21:floppy_emu_read_chs_sector	16	static
+../libraries/floppy_emu/floppy_emu.c:494:21:floppy_emu_build_mfm_track	616	static
+../libraries/floppy_emu/floppy_emu.c:626:13:floppy_emu_status_str	0	static

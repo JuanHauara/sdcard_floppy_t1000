@@ -1,0 +1,13 @@
+../Core/Src/main.c:87:13:app_log_drive_state	1
+../Core/Src/main.c:104:13:app_write_drive_outputs_provisional	1
+../Core/Src/main.c:121:13:app_service_logical_iface	12
+../Core/Src/main.c:224:13:app_log_boot_sector	2
+../Core/Src/main.c:248:13:app_log_fixed_image	2
+../Core/Src/main.c:274:13:app_init	4
+../Core/Src/main.c:318:13:app_service	2
+../Core/Src/main.c:337:5:main	1
+../Core/Src/main.c:387:6:SystemClock_Config	3
+../Core/Src/main.c:433:13:MX_SPI1_Init	2
+../Core/Src/main.c:471:13:MX_TIM2_Init	4
+../Core/Src/main.c:516:13:MX_GPIO_Init	1
+../Core/Src/main.c:561:6:Error_Handler	1

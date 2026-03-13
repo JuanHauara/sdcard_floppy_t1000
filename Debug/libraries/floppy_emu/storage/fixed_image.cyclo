@@ -1,0 +1,9 @@
+../libraries/floppy_emu/storage/fixed_image.c:13:29:fixed_image_map_sd_status	6
+../libraries/floppy_emu/storage/fixed_image.c:39:13:fixed_image_build_path	7
+../libraries/floppy_emu/storage/fixed_image.c:65:22:fixed_image_open	6
+../libraries/floppy_emu/storage/fixed_image.c:107:22:fixed_image_close	3
+../libraries/floppy_emu/storage/fixed_image.c:129:6:fixed_image_is_open	3
+../libraries/floppy_emu/storage/fixed_image.c:134:13:fixed_image_get_path	2
+../libraries/floppy_emu/storage/fixed_image.c:144:22:fixed_image_get_size	4
+../libraries/floppy_emu/storage/fixed_image.c:161:22:fixed_image_read	6
+../libraries/floppy_emu/storage/fixed_image.c:190:13:fixed_image_status_str	8

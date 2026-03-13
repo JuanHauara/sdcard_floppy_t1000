@@ -1,0 +1,4 @@
+../libraries/board_gpio/board_gpio.c:8:6:board_gpio_read_di	16	static
+../libraries/board_gpio/board_gpio.c:26:6:board_gpio_read_do	16	static
+../libraries/board_gpio/board_gpio.c:43:6:board_gpio_write_do	16	static
+../libraries/board_gpio/board_gpio.c:64:6:board_gpio_toggle_do	16	static

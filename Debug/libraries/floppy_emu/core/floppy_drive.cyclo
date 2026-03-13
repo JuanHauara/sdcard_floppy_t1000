@@ -1,0 +1,11 @@
+../libraries/floppy_emu/core/floppy_drive.c:6:13:floppy_drive_load_geometry	5
+../libraries/floppy_emu/core/floppy_drive.c:21:6:floppy_drive_init	2
+../libraries/floppy_emu/core/floppy_drive.c:32:6:floppy_drive_reset	2
+../libraries/floppy_emu/core/floppy_drive.c:45:6:floppy_drive_set_head	4
+../libraries/floppy_emu/core/floppy_drive.c:62:6:floppy_drive_set_selected	2
+../libraries/floppy_emu/core/floppy_drive.c:72:6:floppy_drive_set_motor_on	2
+../libraries/floppy_emu/core/floppy_drive.c:82:6:floppy_drive_step_towards_center	4
+../libraries/floppy_emu/core/floppy_drive.c:99:6:floppy_drive_step_towards_track0	4
+../libraries/floppy_emu/core/floppy_drive.c:116:6:floppy_drive_set_disk_changed	2
+../libraries/floppy_emu/core/floppy_drive.c:126:6:floppy_drive_get_status	3
+../libraries/floppy_emu/core/floppy_drive.c:144:21:floppy_drive_build_current_track	5

@@ -23,6 +23,13 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <string.h>
+
+#include "debug_log.h"
+#include "core/floppy_drive.h"
+#include "floppy_emu.h"
+#include "iface/toshiba_fdd_iface.h"
+#include "utils.h"
 
 /* USER CODE END Includes */
 
@@ -33,6 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define APP_LOG_TRACK0_MFM    0
 
 /* USER CODE END PD */
 
@@ -47,6 +55,11 @@ SPI_HandleTypeDef hspi1;
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
+static floppy_drive_t s_floppy_drive;
+static floppy_emu_t s_floppy_emu;
+static toshiba_fdd_iface_t s_toshiba_fdd_iface;
+static toshiba_fdd_signal_polarity_t s_toshiba_polarity;
+static bool s_prev_step_active;
 
 /* USER CODE END PV */
 
@@ -56,11 +69,264 @@ static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
+static void app_init(void);
+static void app_log_drive_state(void);
+static void app_log_fixed_image(void);
+static void app_log_boot_sector(void);
+#if APP_LOG_TRACK0_MFM
+static void app_log_track0_mfm(void);
+#endif
+static void app_write_drive_outputs_provisional(void);
+static void app_service_logical_iface(void);
+static void app_service(void);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+static void app_log_drive_state(void)
+{
+  floppy_drive_status_t drive_status;
+
+  floppy_drive_get_status(&s_floppy_drive, &drive_status);
+
+  DEBUG_SERIAL_LOG("drive: cyl=%u head=%u media=%u wprot=%u changed=%u selected=%u motor=%u track0=%u\r\n",
+                   drive_status.cylinder,
+                   drive_status.head,
+                   (unsigned int)drive_status.media_present,
+                   (unsigned int)drive_status.write_protected,
+                   (unsigned int)drive_status.disk_changed,
+                   (unsigned int)drive_status.selected,
+                   (unsigned int)drive_status.motor_on,
+                   (unsigned int)drive_status.track0);
+}
+
+static void app_write_drive_outputs_provisional(void)
+{
+  floppy_drive_status_t drive_status;
+  toshiba_fdd_logical_outputs_t logical_outputs;
+
+  /* Provisional bring-up subset: only TRACK0 and WPROTC are driven here. */
+  floppy_drive_get_status(&s_floppy_drive, &drive_status);
+
+  memset(&logical_outputs, 0, sizeof(logical_outputs));
+  logical_outputs.track0_active = drive_status.track0;
+  logical_outputs.track0_valid = true;
+  logical_outputs.wprotc_active = drive_status.write_protected;
+  logical_outputs.wprotc_valid = true;
+
+  (void)toshiba_fdd_iface_write_outputs(&logical_outputs, &s_toshiba_polarity);
+}
+
+static void app_service_logical_iface(void)
+{
+  toshiba_fdd_logical_inputs_t logical_inputs;
+  bool step_moved;
+
+  if (!toshiba_fdd_iface_decode_inputs(&s_toshiba_fdd_iface,
+                                       &s_toshiba_polarity,
+                                       &logical_inputs))
+  {
+    s_prev_step_active = false;
+    return;
+  }
+
+  if (logical_inputs.drive_select_valid)
+  {
+    floppy_drive_set_selected(&s_floppy_drive, logical_inputs.drive_select);
+  }
+
+  if (logical_inputs.motor_on_valid)
+  {
+    floppy_drive_set_motor_on(&s_floppy_drive, logical_inputs.motor_on);
+  }
+
+  if (logical_inputs.side_valid)
+  {
+    (void)floppy_drive_set_head(&s_floppy_drive, logical_inputs.side_1_selected ? 1u : 0u);
+  }
+
+  step_moved = false;
+  if (!logical_inputs.step_active_valid)
+  {
+    s_prev_step_active = false;
+    return;
+  }
+
+  if (logical_inputs.step_active && !s_prev_step_active)
+  {
+    if (!logical_inputs.direction_valid)
+    {
+      DEBUG_SERIAL_LOG("drive step edge ignored: fdcdrc polarity pending\r\n");
+      app_log_drive_state();
+      app_write_drive_outputs_provisional();
+      s_prev_step_active = logical_inputs.step_active;
+      return;
+    }
+
+    if (logical_inputs.direction_towards_center)
+    {
+      step_moved = floppy_drive_step_towards_center(&s_floppy_drive);
+    }
+    else
+    {
+      step_moved = floppy_drive_step_towards_track0(&s_floppy_drive);
+    }
+
+    DEBUG_SERIAL_LOG("drive step dir=%s moved=%u\r\n",
+                     logical_inputs.direction_towards_center ? "center" : "track0",
+                     (unsigned int)step_moved);
+    app_log_drive_state();
+    app_write_drive_outputs_provisional();
+  }
+
+  s_prev_step_active = logical_inputs.step_active;
+}
+
+#if APP_LOG_TRACK0_MFM
+static void app_log_track0_mfm(void)
+{
+  static uint16_t s_track_words[FLOPPY_EMU_MAX_TRACK_WORDS];
+  floppy_emu_track_info_t track_info;
+  floppy_emu_status_t status;
+  uint32_t words_to_log;
+  uint32_t index;
+
+  status = floppy_drive_build_current_track(&s_floppy_drive,
+                                            &s_floppy_emu,
+                                            s_track_words,
+                                            FLOPPY_EMU_MAX_TRACK_WORDS,
+                                            &track_info);
+  if (status != FLOPPY_EMU_STATUS_OK)
+  {
+    DEBUG_SERIAL_LOG("track 0.0 build failed: %s\r\n", floppy_emu_status_str(status));
+    return;
+  }
+
+  DEBUG_SERIAL_LOG("track 0.0: rate=%u rpm=%u words=%lu gap4a=%lu gap3=%lu pre_index=%lu\r\n",
+                   track_info.data_rate_kbps,
+                   track_info.rpm,
+                   (unsigned long)track_info.track_word_count,
+                   (unsigned long)track_info.gap_4a_words,
+                   (unsigned long)track_info.gap_3_words,
+                   (unsigned long)track_info.pre_index_gap_words);
+
+  words_to_log = (track_info.track_word_count < 8u) ? track_info.track_word_count : 8u;
+  DEBUG_SERIAL_LOG("track 0.0 first words:");
+  for (index = 0u; index < words_to_log; index++)
+  {
+    DEBUG_SERIAL_LOG(" %04X", s_track_words[index]);
+  }
+  DEBUG_SERIAL_LOG("\r\n");
+}
+#endif
+
+static void app_log_boot_sector(void)
+{
+  uint8_t boot_sector[FLOPPY_EMU_SECTOR_SIZE];
+  uint16_t boot_signature;
+  floppy_emu_status_t status;
+
+  status = floppy_emu_read_lba_sector(&s_floppy_emu, 0u, boot_sector, sizeof(boot_sector));
+  if (status != FLOPPY_EMU_STATUS_OK)
+  {
+    DEBUG_SERIAL_LOG("boot sector read failed: %s\r\n", floppy_emu_status_str(status));
+    return;
+  }
+
+  boot_signature = (uint16_t)boot_sector[510]
+                 | ((uint16_t)boot_sector[511] << 8);
+
+  DEBUG_SERIAL_LOG("boot jump=%02X %02X %02X oem='%.8s' sig=%04X\r\n",
+                   boot_sector[0],
+                   boot_sector[1],
+                   boot_sector[2],
+                   &boot_sector[3],
+                   boot_signature);
+}
+
+static void app_log_fixed_image(void)
+{
+  const floppy_emu_geometry_t *geometry = floppy_emu_get_geometry(&s_floppy_emu);
+
+  if (geometry == NULL)
+  {
+    DEBUG_SERIAL_LOG("geometry unavailable\r\n");
+    return;
+  }
+
+  DEBUG_SERIAL_LOG("fixed image: %s\r\n", floppy_emu_get_path(&s_floppy_emu));
+  DEBUG_SERIAL_LOG("geometry: %lu bytes, %u cyl, %u heads, %u spt, %u bps\r\n",
+                   (unsigned long)s_floppy_emu.size_bytes,
+                   geometry->cylinders,
+                   geometry->heads,
+                   geometry->sectors_per_track,
+                   geometry->bytes_per_sector);
+
+  app_log_boot_sector();
+  app_log_drive_state();
+
+#if APP_LOG_TRACK0_MFM
+  app_log_track0_mfm();
+#endif
+}
+
+static void app_init(void)
+{
+  const toshiba_fdd_inputs_t *inputs;
+  floppy_emu_status_t status;
+
+  if (HAL_TIM_Base_Start(&htim2) != HAL_OK)
+  {
+    DEBUG_SERIAL_LOG("tim2 start failed\r\n");
+    return;
+  }
+
+  delay_ms(200u);
+  DEBUG_SERIAL_LOG("\r\nsdcard_floppy_t1000 boot\r\n");
+
+  toshiba_fdd_iface_init(&s_toshiba_fdd_iface);
+  inputs = toshiba_fdd_iface_get_inputs(&s_toshiba_fdd_iface);
+  if (inputs != NULL)
+  {
+    DEBUG_SERIAL_LOG("pj5 init raw fd_sela=%u mona=%u lowdns=%u fdcdrc=%u step=%u wgate=%u side=%u wdata=%u\r\n",
+                     (unsigned int)inputs->fd_sela_raw,
+                     (unsigned int)inputs->mona_raw,
+                     (unsigned int)inputs->lowdns_raw,
+                     (unsigned int)inputs->fdcdrc_raw,
+                     (unsigned int)inputs->step_raw,
+                     (unsigned int)inputs->wgate_raw,
+                     (unsigned int)inputs->side_raw,
+                     (unsigned int)inputs->wdata_raw);
+  }
+  toshiba_fdd_iface_load_initial_guess_polarity(&s_toshiba_polarity);
+  DEBUG_SERIAL_LOG("pj5 polarity loaded: initial_guess\r\n");
+  DEBUG_SERIAL_LOG("pj5 polarity pending: media fdcdrc rdda\r\n");
+
+  status = floppy_emu_mount_fixed_image(&s_floppy_emu);
+  if (status != FLOPPY_EMU_STATUS_OK)
+  {
+    DEBUG_SERIAL_LOG("fixed image mount failed: %s\r\n", floppy_emu_status_str(status));
+    return;
+  }
+
+  floppy_drive_init(&s_floppy_drive, &s_floppy_emu);
+  app_write_drive_outputs_provisional();
+  app_log_fixed_image();
+}
+
+static void app_service(void)
+{
+  uint32_t changed_mask;
+
+  changed_mask = toshiba_fdd_iface_poll_inputs(&s_toshiba_fdd_iface);
+  if (changed_mask != TOSHIBA_FDD_CHANGED_NONE)
+  {
+    toshiba_fdd_iface_log_inputs(&s_toshiba_fdd_iface, changed_mask);
+  }
+
+  app_service_logical_iface();
+}
 
 /* USER CODE END 0 */
 
@@ -98,6 +364,7 @@ int main(void)
   MX_TIM2_Init();
   MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
+  app_init();
 
   /* USER CODE END 2 */
 
@@ -108,6 +375,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    app_service();
   }
   /* USER CODE END 3 */
 }

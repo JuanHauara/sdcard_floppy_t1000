@@ -59,6 +59,10 @@
 									<listOptionValue builtIn="false" value="../FATFS/Target"/>
 									<listOptionValue builtIn="false" value="../FATFS/App"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
+									<listOptionValue builtIn="false" value="../libraries/floppy_emu"/>
+									<listOptionValue builtIn="false" value="&quot;../libraries\floppy_emu\core&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../libraries\floppy_emu\iface&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../libraries\floppy_emu\storage&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.353805378" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -85,15 +89,19 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/debug_log"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/utils"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/board_gpio"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="FATFS"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_DEVICE"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/board_gpio"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/debug_log"/>
+						<entry excluding="core|iface|storage" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/floppy_emu"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/floppy_emu/core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/floppy_emu/iface"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/floppy_emu/storage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/sd_card"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/utils"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -153,6 +161,10 @@
 									<listOptionValue builtIn="false" value="../FATFS/Target"/>
 									<listOptionValue builtIn="false" value="../FATFS/App"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FatFs/src"/>
+									<listOptionValue builtIn="false" value="../libraries/floppy_emu"/>
+									<listOptionValue builtIn="false" value="&quot;../libraries\floppy_emu\core&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../libraries\floppy_emu\iface&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../libraries\floppy_emu\storage&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1103197077" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -179,15 +191,19 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/debug_log"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/utils"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/board_gpio"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="FATFS"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="USB_DEVICE"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/board_gpio"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/debug_log"/>
+						<entry excluding="core|iface|storage" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/floppy_emu"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/floppy_emu/core"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/floppy_emu/iface"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/floppy_emu/storage"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/sd_card"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="libraries/utils"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

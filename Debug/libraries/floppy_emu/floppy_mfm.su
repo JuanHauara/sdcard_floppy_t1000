@@ -1,0 +1,2 @@
+../libraries/floppy_emu/floppy_mfm.c:41:10:floppy_mfm_encode_byte	16	static
+../libraries/floppy_emu/floppy_mfm.c:46:6:floppy_mfm_encode_bytes	40	static

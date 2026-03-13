@@ -1,0 +1,7 @@
+../FATFS/Target/user_diskio.c:48:13:user_drive_is_valid	1
+../FATFS/Target/user_diskio.c:53:16:sd_spi_status_to_dresult	3
+../FATFS/Target/user_diskio.c:103:9:USER_initialize	4
+../FATFS/Target/user_diskio.c:141:9:USER_status	3
+../FATFS/Target/user_diskio.c:174:9:USER_read	5
+../FATFS/Target/user_diskio.c:212:9:USER_write	5
+../FATFS/Target/user_diskio.c:250:9:USER_ioctl	11

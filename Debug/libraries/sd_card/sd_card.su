@@ -1,0 +1,13 @@
+../libraries/sd_card/sd_card.c:8:25:sd_card_map_fresult	16	static
+../libraries/sd_card/sd_card.c:41:13:sd_card_is_flag_set	16	static
+../libraries/sd_card/sd_card.c:46:18:sd_card_init	16	static
+../libraries/sd_card/sd_card.c:58:18:sd_card_deinit	16	static
+../libraries/sd_card/sd_card.c:66:6:sd_card_is_ready	4	static
+../libraries/sd_card/sd_card.c:71:18:sd_card_file_open	32	static
+../libraries/sd_card/sd_card.c:132:18:sd_card_file_close	16	static
+../libraries/sd_card/sd_card.c:142:18:sd_card_file_read	32	static
+../libraries/sd_card/sd_card.c:158:18:sd_card_file_write	32	static
+../libraries/sd_card/sd_card.c:177:18:sd_card_file_seek	16	static
+../libraries/sd_card/sd_card.c:187:18:sd_card_file_tell	24	static
+../libraries/sd_card/sd_card.c:207:18:sd_card_file_size	24	static
+../libraries/sd_card/sd_card.c:227:18:sd_card_file_sync	16	static

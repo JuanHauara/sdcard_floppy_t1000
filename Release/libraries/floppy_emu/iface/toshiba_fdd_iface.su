@@ -1,0 +1,10 @@
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:26:13:toshiba_fdd_iface_decode_signal	8	static
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:68:13:toshiba_fdd_iface_apply_signal	0	static
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:102:13:toshiba_fdd_iface_read_inputs_raw.part.0	8	static
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:167:6:toshiba_fdd_iface_load_initial_guess_polarity	8	static
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:196:6:toshiba_fdd_iface_init	8	static
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:209:10:toshiba_fdd_iface_poll_inputs	24	static
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:234:29:toshiba_fdd_iface_get_inputs	0	static
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:244:6:toshiba_fdd_iface_log_inputs	16	static
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:295:6:toshiba_fdd_iface_decode_inputs	24	static
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:340:6:toshiba_fdd_iface_write_outputs	24	static

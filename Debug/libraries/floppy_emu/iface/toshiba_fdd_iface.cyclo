@@ -1,0 +1,15 @@
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:13:13:toshiba_fdd_iface_configure_signal	2
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:26:13:toshiba_fdd_iface_decode_signal	5
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:47:13:toshiba_fdd_iface_read_output_raw	1
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:52:13:toshiba_fdd_iface_read_outputs_raw	2
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:68:13:toshiba_fdd_iface_apply_signal	5
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:86:13:toshiba_fdd_iface_write_outputs_raw	2
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:102:13:toshiba_fdd_iface_read_inputs_raw	2
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:119:17:toshiba_fdd_iface_diff_inputs	10
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:167:6:toshiba_fdd_iface_load_initial_guess_polarity	2
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:196:6:toshiba_fdd_iface_init	2
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:209:10:toshiba_fdd_iface_poll_inputs	4
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:234:29:toshiba_fdd_iface_get_inputs	2
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:244:6:toshiba_fdd_iface_log_inputs	10
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:295:6:toshiba_fdd_iface_decode_inputs	5
+../libraries/floppy_emu/iface/toshiba_fdd_iface.c:340:6:toshiba_fdd_iface_write_outputs	3

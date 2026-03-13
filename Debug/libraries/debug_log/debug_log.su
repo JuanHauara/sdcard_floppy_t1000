@@ -1,0 +1,2 @@
+../libraries/debug_log/debug_log.c:12:13:send	24	static
+../libraries/debug_log/debug_log.c:27:6:debug_log_format	528	static
