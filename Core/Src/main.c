@@ -76,6 +76,11 @@ static void app_log_boot_sector(void);
 #if APP_LOG_TRACK0_MFM
 static void app_log_track0_mfm(void);
 #endif
+static void app_log_step_result(bool fdcdrc_raw,
+                                bool direction_towards_center,
+                                uint16_t previous_cylinder,
+                                uint16_t new_cylinder,
+                                bool step_moved);
 static void app_write_drive_outputs_provisional(void);
 static void app_service_logical_iface(void);
 static void app_service(void);
@@ -101,6 +106,20 @@ static void app_log_drive_state(void)
                    (unsigned int)drive_status.track0);
 }
 
+static void app_log_step_result(bool fdcdrc_raw,
+                                bool direction_towards_center,
+                                uint16_t previous_cylinder,
+                                uint16_t new_cylinder,
+                                bool step_moved)
+{
+  DEBUG_SERIAL_LOG("drive step: fdcdrc_raw=%u dir=%s cyl=%u->%u moved=%u\r\n",
+                   (unsigned int)fdcdrc_raw,
+                   direction_towards_center ? "towards_center" : "towards_track0",
+                   previous_cylinder,
+                   new_cylinder,
+                   (unsigned int)step_moved);
+}
+
 static void app_write_drive_outputs_provisional(void)
 {
   floppy_drive_status_t drive_status;
@@ -120,7 +139,10 @@ static void app_write_drive_outputs_provisional(void)
 
 static void app_service_logical_iface(void)
 {
+  const toshiba_fdd_inputs_t *raw_inputs;
   toshiba_fdd_logical_inputs_t logical_inputs;
+  floppy_drive_status_t drive_status_before_step;
+  floppy_drive_status_t drive_status_after_step;
   bool step_moved;
 
   if (!toshiba_fdd_iface_decode_inputs(&s_toshiba_fdd_iface,
@@ -155,14 +177,16 @@ static void app_service_logical_iface(void)
 
   if (logical_inputs.step_active && !s_prev_step_active)
   {
-    if (!logical_inputs.direction_valid)
+    raw_inputs = toshiba_fdd_iface_get_inputs(&s_toshiba_fdd_iface);
+    if ((raw_inputs == NULL) || !logical_inputs.direction_valid)
     {
-      DEBUG_SERIAL_LOG("drive step edge ignored: fdcdrc polarity pending\r\n");
-      app_log_drive_state();
+      DEBUG_SERIAL_LOG("drive step edge ignored: fdcdrc direction unavailable\r\n");
       app_write_drive_outputs_provisional();
       s_prev_step_active = logical_inputs.step_active;
       return;
     }
+
+    floppy_drive_get_status(&s_floppy_drive, &drive_status_before_step);
 
     if (logical_inputs.direction_towards_center)
     {
@@ -173,10 +197,12 @@ static void app_service_logical_iface(void)
       step_moved = floppy_drive_step_towards_track0(&s_floppy_drive);
     }
 
-    DEBUG_SERIAL_LOG("drive step dir=%s moved=%u\r\n",
-                     logical_inputs.direction_towards_center ? "center" : "track0",
-                     (unsigned int)step_moved);
-    app_log_drive_state();
+    floppy_drive_get_status(&s_floppy_drive, &drive_status_after_step);
+    app_log_step_result(raw_inputs->fdcdrc_raw,
+                        logical_inputs.direction_towards_center,
+                        drive_status_before_step.cylinder,
+                        drive_status_after_step.cylinder,
+                        step_moved);
     app_write_drive_outputs_provisional();
   }
 
@@ -301,7 +327,8 @@ static void app_init(void)
   }
   toshiba_fdd_iface_load_initial_guess_polarity(&s_toshiba_polarity);
   DEBUG_SERIAL_LOG("pj5 polarity loaded: initial_guess\r\n");
-  DEBUG_SERIAL_LOG("pj5 polarity pending: media fdcdrc rdda\r\n");
+  DEBUG_SERIAL_LOG("pj5 fdcdrc initial_guess: raw=0 -> towards_center\r\n");
+  DEBUG_SERIAL_LOG("pj5 polarity pending: media rdda\r\n");
 
   status = floppy_emu_mount_fixed_image(&s_floppy_emu);
   if (status != FLOPPY_EMU_STATUS_OK)

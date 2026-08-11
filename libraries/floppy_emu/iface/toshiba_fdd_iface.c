@@ -179,6 +179,7 @@ void toshiba_fdd_iface_load_initial_guess_polarity(
     toshiba_fdd_iface_configure_signal(&polarity->mona_active, true, false);
     toshiba_fdd_iface_configure_signal(&polarity->lowdns_active, true, true);
     toshiba_fdd_iface_configure_signal(&polarity->step_active, true, false);
+    toshiba_fdd_iface_configure_signal(&polarity->fdcdrc_towards_center, true, false);
     toshiba_fdd_iface_configure_signal(&polarity->wgate_active, true, false);
     toshiba_fdd_iface_configure_signal(&polarity->side_1_level, true, false);
     toshiba_fdd_iface_configure_signal(&polarity->index_active, true, false);
@@ -188,7 +189,6 @@ void toshiba_fdd_iface_load_initial_guess_polarity(
     toshiba_fdd_iface_configure_signal(&polarity->wprotc_active, true, false);
 
     /* pending */
-    toshiba_fdd_iface_configure_signal(&polarity->fdcdrc_towards_center, false, false);
     toshiba_fdd_iface_configure_signal(&polarity->media_active, false, false);
     toshiba_fdd_iface_configure_signal(&polarity->rdda_active, false, false);
 }

@@ -22,9 +22,9 @@
         SET_BIT_U8(x, 3);   // x = 0b00001000
         CLEAR_BIT_U8(x, 3); // x = 0
 */
-#define MASK_U8(bit_pos)			( (uint8_t)( ((unsigned)(bit_pos) < 8u) ? (1u << (unsigned)(bit_pos)) : 0u ) )
-#define SET_BIT_U8(num, bit_pos)		do { (num) |= MASK_U8(bit_pos); } while (0)
-#define CLEAR_BIT_U8(num, bit_pos)         do { (num) &= (uint8_t)~MASK_U8(bit_pos); } while (0)
+#define MASK_U8(bit_pos)                ( (uint8_t)( ((unsigned)(bit_pos) < 8u) ? (1u << (unsigned)(bit_pos)) : 0u ) )
+#define SET_BIT_U8(num, bit_pos)        do { (num) |= MASK_U8(bit_pos); } while (0)
+#define CLEAR_BIT_U8(num, bit_pos)      do { (num) &= (uint8_t)~MASK_U8(bit_pos); } while (0)
 
 /*
 	Safety macro to read a bit from a uint8_t value.
@@ -33,7 +33,7 @@
 	Safety: positions >= 8 are read as 0.
 	Evaluation: both 'num' and 'bit_pos' are evaluated once.
 */
-#define TEST_BIT_U8(num, bit_pos)		( ( ((uint8_t)(num)) & MASK_U8(bit_pos) ) ? 1u : 0u )
+#define TEST_BIT_U8(num, bit_pos)       ( ( ((uint8_t)(num)) & MASK_U8(bit_pos) ) ? 1u : 0u )
 
 
 /* Global functions */

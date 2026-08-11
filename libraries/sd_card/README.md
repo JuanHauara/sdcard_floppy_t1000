@@ -24,16 +24,29 @@ The purpose of this module is to expose the standard FatFs disk I/O callbacks re
 
 These functions translate FatFs requests into block-level SD card operations through the custom SPI SD driver.
 
-## Notes
+When FATFS is enabled in STM32CubeIDE, the tool generates the `user_diskio.c` file as the user-defined
+disk I/O backend for FatFs. That generated file contains the expected callback interface, but the actual
+logic must be implemented by us so that FatFs can access the real storage device through the project SD
+card driver. In this project, those functions connect the FatFs layer with the SPI microSD driver and,
+through it, with the physical microSD card connected to the MCU.
 
-If you have a `.c` file inside a `doc/` folder that is only meant for documentation, it should **not** be added to the build source list.
-In STM32CubeIDE, the cleanest approach is:
+## microSD formatting
 
-- Right click the file
-- `Resource Configurations -> Exclude from Build...`
-- Mark `Debug` and `Release`
+The microSD cards were formatted using MiniTool Partition Wizard because formatting
+storage devices larger than 32 GB as FAT32 is often not supported correctly by the
+standard Windows formatting tools. This software completed the FAT32 formatting
+successfully.
 
-That keeps the file inside the project without compiling it.
+Formatting procedure used:
+
+- Delete the existing partition.
+- Create a new partition with the following settings:
+- Create as: Primary
+- File system: FAT32
+- Cluster size: 32 KB
+- Partition size: full disk
+- Unallocated space before/after: 0
+- Align partition to: MB
 
 ## Source code: `user_diskio.c`
 

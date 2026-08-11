@@ -2,9 +2,11 @@
 	Minimal and portable debug logging system.
 
 	Usage:
-	- Set ENABLE_SERIAL_DEBUG to 1 to enable debug messages, or 0 to disable them.
+	- Set DEBUG_LOG_ENABLE_SERIAL_DEBUG to 1 to enable debug messages, or 0 to disable them.
 	- Use DEBUG_SERIAL_LOG(...) in your code like printf to print formatted debug messages.
 	- When disabled, DEBUG_SERIAL_LOG(...) expands to ((void)0), generating no code.
+	- To view debug messages on the PC, enable the "Enable DTR" option in the terminal 
+	  application on the PC.
 
 	How to use:
 	1. In your debug_log.c file, implement:
@@ -39,18 +41,25 @@
 #include <stdio.h>
 
 
-#define ENABLE_SERIAL_DEBUG		1		// Global flag to enable/disable debug logging.
-#define MAX_LEN_CSTR_BUFFER		512		// Maximum size in Bytes of the debug message to be transmitted.
+#define DEBUG_LOG_ENABLE_SERIAL_DEBUG	1		// Global flag to enable/disable debug logging.
+#define DEBUG_LOG_MAX_LEN_CSTR_BUFFER	300		// Maximum size in Bytes of the debug message to be transmitted.
+/*
+	Maximum time to wait for the USB port to finish sending the previous
+	log before sending the next one.
+	Increase this value if logs are printed incompletely or are not
+	being transmitted.
+*/
+#define DEBUG_LOG_SEND_TIMEOUT_MS		50
 
 
-#if ENABLE_SERIAL_DEBUG
+#if DEBUG_LOG_ENABLE_SERIAL_DEBUG
 	void debug_log_format(const char *fmt, ...);
 	
 	#define DEBUG_SERIAL_LOG(...) debug_log_format(__VA_ARGS__)
 #else
-	// If ENABLE_SERIAL_DEBUG is disabled, no code is generated.
+	// If DEBUG_LOG_ENABLE_SERIAL_DEBUG is disabled, no code is generated.
 	#define DEBUG_SERIAL_LOG(...) ((void)0)
-#endif  // ENABLE_SERIAL_DEBUG
+#endif  // DEBUG_LOG_ENABLE_SERIAL_DEBUG
 
 
 #endif  // DEBUG_SERIAL_LOG_H
